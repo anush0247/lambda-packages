@@ -78,6 +78,10 @@ lambda_packages = {
         'python3.6': {
             'version': '1.3.12',
             'path': os.path.join(PACKAGES_DIR, 'mysqlclient', 'python3.6-mysqlclient-1.3.12.tar.gz')
+        },
+        'python3.7': {
+            'version': '1.3.14',
+            'path': os.path.join(PACKAGES_DIR, 'mysqlclient', 'python3.7-mysqlclient-1.3.14.tar.gz')
         }
     },
     'numpy': {

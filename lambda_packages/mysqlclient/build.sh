@@ -8,7 +8,7 @@
 # with --docker (you need docker installed and network access to reach lambci's
 # docker-lambda image).
 #
-# Defaults to building both python2.7 and python3.6 packages. If you only want
+# Defaults to building both python2.7 and python3.7 packages. If you only want
 # one of them use either --py2-only or --py3-only.
 #
 set -e
@@ -16,6 +16,7 @@ set -e
 DOCKER=0
 PY2=1
 PY3=1
+PY37=1
 SUDO=sudo
 
 while [[ $# -gt 2 ]]
@@ -31,11 +32,19 @@ case $key in
     --py2-only)
         PY2=1
         PY3=0
+        PY37=0
         shift
         ;;
     --py3-only)
         PY2=0
         PY3=1
+        PY37=0
+        shift
+        ;;
+    --py37-only)
+        PY2=0
+        PY3=0
+        PY37=1
         shift
         ;;
     *)
@@ -50,6 +59,7 @@ VERSION=${2}
 echo DOCKER          = "${DOCKER}"
 echo PY2             = "${PY2}"
 echo PY3             = "${PY3}"
+echo PY37             = "${PY37}"
 echo PACKAGE         = "${PACKAGE}"
 echo VERSION         = "${VERSION}"
 
@@ -88,8 +98,13 @@ function build_package {
 
     echo "install pips"
     TARGET_DIR=${ENV}/packaged
-    echo ${PIP} install --verbose --use-wheel --no-dependencies --target ${TARGET_DIR} "${PACKAGE}==${VERSION}"
-    ${PIP} install --verbose --use-wheel --no-dependencies --target ${TARGET_DIR} "${PACKAGE}==${VERSION}"
+    if [PIP == "pip3.7"]; then
+        echo ${PIP} install --verbose --no-dependencies --target ${TARGET_DIR} "${PACKAGE}==${VERSION}"
+        ${PIP} install --verbose --no-dependencies --target ${TARGET_DIR} "${PACKAGE}==${VERSION}"
+    else
+        echo ${PIP} install --verbose --use-wheel --no-dependencies --target ${TARGET_DIR} "${PACKAGE}==${VERSION}"
+        ${PIP} install --verbose --use-wheel --no-dependencies --target ${TARGET_DIR} "${PACKAGE}==${VERSION}"
+    fi
     deactivate
 
     TARGET_DIR=${ENV}/packaged
@@ -104,4 +119,8 @@ fi
 
 if [ ${PY3} == 1 ]; then
     build_package ${PACKAGE} ${VERSION} python3.6 pip3.6 "python3.6 -m venv "
+fi
+
+if [ ${PY37} == 1 ]; then
+    build_package ${PACKAGE} ${VERSION} python3.7 pip3.7 "python3.7 -m venv "
 fi
